@@ -1,0 +1,13 @@
+env: %ENV%
+
+logs_enabled: true
+
+process_config:
+    enabled: 'true'
+    scrub_args: true
+    custom_sensitive_words: ['personal_key', '*token', 'sql*', '*pass*d*']
+
+apm_config:
+  enabled: true
+  env: "%ENV%"
+  apm_non_local_traffic: true

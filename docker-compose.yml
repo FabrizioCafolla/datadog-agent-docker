@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: ./Dockerfile
+    container_name: app
+    tty: true
+    volumes:
+      - app-log:/var/log/app
+    environment:
+      - DD_SERVICE=${DD_SERVICE}
+      - DD_AGENT_HOST=${DD_AGENT_HOST}
+      - DD_TRACE_AGENT_PORT=${DD_TRACE_AGENT_PORT}
+      - DD_VERSION=${DD_VERSION}
+    networks:
+      app-network:
+        aliases:
+          - "app.private"
+
+  datadog:
+    build:
+      context: ./datadog
+      dockerfile: Dockerfile
+      args:
+        ENV: ${ENV}
+    container_name: dd-agent
+    ports:
+        - "8126:8126"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - /etc/passwd:/etc/passwd:ro
+      - app-log:/var/log/app:ro
+    env_file:
+      - .env
+    environment:
+      - DD_BIND_HOST=0.0.0.0
+    depends_on:
+      - app      
+    networks:
+      app-network:
+        aliases:
+          - "dd-agent.private"
+
+networks:
+  app-network:
+
+volumes:
+  app-log:
